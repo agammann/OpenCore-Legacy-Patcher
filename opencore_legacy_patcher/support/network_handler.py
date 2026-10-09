@@ -338,6 +338,7 @@ class DownloadObject:
                 raise Exception(self.error_msg)
 
             response = NetworkUtilities().get(self.url, stream=True, timeout=10)
+            response.raise_for_status()
 
             with open(self.filepath, 'wb') as file:
                 atexit.register(self.stop)
@@ -365,13 +366,13 @@ class DownloadObject:
                 if self._checksum_storage:
                     self.checksum = self._checksum_storage.hexdigest()
                     logging.info(f"Checksum: {self.checksum}")
+                self.status = DownloadStatus.COMPLETE
         except Exception as e:
             self.error = True
             self.error_msg = str(e)
             self.status = DownloadStatus.ERROR
             logging.error(f"Error downloading {self.url}: {self.error_msg}")
 
-        self.status = DownloadStatus.COMPLETE
         utilities.enable_sleep_after_running()
 
 
